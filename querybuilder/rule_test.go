@@ -54,7 +54,7 @@ var ruleDataset = map[string]interface{}{
 func TestRuleEvaluate(t *testing.T) {
 	for _, i := range ruleInputs {
 		t.Run(i.rule.ID, func(t *testing.T) {
-			if ok := i.rule.Evaluate(ruleDataset); ok != i.want {
+			if ok, _ := i.rule.Evaluate(ruleDataset); ok != i.want {
 				t.Errorf("Evaluate got %t, want: true", ok)
 			}
 		})
@@ -66,7 +66,7 @@ func BenchmarkRuleEvaluate(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, j := range ruleInputs {
-			ok = j.rule.Evaluate(ruleDataset)
+			ok, _ = j.rule.Evaluate(ruleDataset)
 		}
 	}
 

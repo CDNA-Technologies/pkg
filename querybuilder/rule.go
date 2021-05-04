@@ -19,45 +19,45 @@ type Rule struct {
 }
 
 // Evaluate function checks whether the dataset matches with rule
-func (r *Rule) Evaluate(dataset map[string]interface{}) interface{} {
+func (r *Rule) Evaluate(dataset map[string]interface{}) (interface{}, interface{}) {
+	var err interface{} = nil
 	var wg sync.WaitGroup
 	var input, value interface{}
 
 	opr, ok := operator.GetOperator(r.Operator)
 	if !ok {
-		return false
+		return false, err
 	}
 
 	wg.Add(2)
 	go func() {
-		input = r.getInputValue(dataset)
-		//fmt.Println("Input is ", input)
-		//if input is null, some error is happening
+		input, err = r.getInputValue(dataset)
 		wg.Done()
 	}()
 
 	go func() {
-		value = r.getValue()
+		value, err = r.getValue()
 		wg.Done()
 	}()
 
 	wg.Wait()
 
 	if input == nil {
-		return nil
+		return false, err
 	}
 
-	return opr.Evaluate(input, value)
+	return opr.Evaluate(input, value), err
 }
 
-func (r *Rule) getValue() interface{} {
+func (r *Rule) getValue() (interface{}, interface{}) {
 	return r.parseValue(r.Value)
 }
 
 // getInputValue fetch in the dataset the field value and convert to the type of the rule
-func (r *Rule) getInputValue(dataset map[string]interface{}) interface{} {
+func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, interface{}) {
 	var rdataset = make(map[string]interface{})
 	var result interface{}
+	var err interface{} = nil
 	var ok bool
 
 	for k, v := range dataset {
@@ -70,7 +70,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) interface{} {
 	for i := 0; i < steps; i++ {
 		result, ok = rdataset[field[i]]
 		if !ok {
-			return nil
+			return nil, err
 		}
 
 		rresult := reflect.ValueOf(result)
@@ -81,39 +81,41 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) interface{} {
 		}
 
 		if result == nil {
-			return nil
+			return nil, err
 		}
 	}
 
-	iv := r.parseValue(result)
+	iv, err := r.parseValue(result)
 
 	if r.Sanitize && r.Type == "string" {
 		v := iv.(string)
-		return sanitize(&v)
+		return sanitize(&v), err
 	}
 
-	return iv
+	return iv, err
 }
 
-func (r *Rule) parseValue(v interface{}) interface{} {
+func (r *Rule) parseValue(v interface{}) (interface{}, interface{}) {
+	var err interface{} = nil
+
 	rv := reflect.ValueOf(v)
 
 	if rv.Kind() == reflect.Slice {
 		sv := make([]interface{}, rv.Len())
 
 		for i, vv := range v.([]interface{}) {
-			sv[i] = r.castValue(vv)
+			sv[i], err = r.castValue(vv)
 		}
-		return sv
+		return sv, err
 	}
 
 	return r.castValue(v)
 }
 
 // Available types in jQuery Query Builder are string, integer, double, date, time, datetime and boolean.
-func (r *Rule) castValue(v interface{}) interface{} {
+func (r *Rule) castValue(v interface{}) (interface{}, interface{}) {
 	if v == nil {
-		return nil
+		return nil, nil
 	}
 
 	switch r.Type {
@@ -132,6 +134,6 @@ func (r *Rule) castValue(v interface{}) interface{} {
 	case "boolean":
 		return toBoolean(v)
 	default:
-		return v
+		return v, nil
 	}
 }

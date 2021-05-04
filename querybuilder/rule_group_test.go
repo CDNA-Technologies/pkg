@@ -66,7 +66,7 @@ func TestRuleGroupEvaluate(t *testing.T) {
 
 			rg := RuleGroup{Condition: rules["condition"], Rules: rules["rules"]}
 
-			if got := rg.Evaluate(parseJson(input.dataset)); got != input.want {
+			if got, _ := rg.Evaluate(parseJson(input.dataset)); got != input.want {
 				t.Error("Evaluate got false, want true")
 			}
 		})
