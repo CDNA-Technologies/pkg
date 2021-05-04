@@ -12,43 +12,53 @@ const (
 	DATE_TIME_ISO_8601 = "2006-01-02T15:04:05"
 )
 
+//Error Checker function
+func checkError(val interface{}, err interface{}) interface{} {
+	if err == nil {
+		return val
+	}
+	return nil
+}
+
 // String
-func toString(v interface{}) string {
-	switch v.(type) {
+func toString(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		return v.(string)
+		return v
 	case float64:
-		return fmt.Sprintf("%f", v.(float64))
+		return fmt.Sprintf("%f", v)
 	case bool:
-		return fmt.Sprintf("%t", v.(bool))
+		return fmt.Sprintf("%t", v)
 	default:
 		return ""
 	}
 }
 
 // Double
-func toDouble(v interface{}) float64 {
-	switch v.(type) {
+func toDouble(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		f, _ := strconv.ParseFloat(v.(string), 64)
-		return f
+		f, err := strconv.ParseFloat(v, 64)
+		return checkError(f, err)
 	case float64:
-		return v.(float64)
+		return v
 	default:
 		return 0
 	}
 }
 
 // Integer
-func toInteger(v interface{}) int {
-	switch v.(type) {
+func toInteger(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		i, _ := strconv.Atoi(v.(string))
-		return i
+		i, err := strconv.Atoi(v)
+		return checkError(i, err)
 	case float64:
-		return int(v.(float64))
+		return int(v)
+	case int:
+		return v
 	case bool:
-		if v.(bool) {
+		if v {
 			return 1
 		}
 		return 0
@@ -58,52 +68,52 @@ func toInteger(v interface{}) int {
 }
 
 // Boolean
-func toBoolean(v interface{}) bool {
-	switch v.(type) {
+func toBoolean(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		b, _ := strconv.ParseBool(v.(string))
-		return b
+		b, err := strconv.ParseBool(v)
+		return checkError(b, err)
 	case float64:
-		n := int(v.(float64))
+		n := int(v)
 		if n == 1 {
 			return true
 		}
 		return false
 	case bool:
-		return v.(bool)
+		return v
 	default:
 		return false
 	}
 }
 
 // Date
-func toDate(v interface{}) time.Time {
-	switch v.(type) {
+func toDate(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		t, _ := time.Parse(DATE_ISO_8601, v.(string))
-		return t
+		t, err := time.Parse(DATE_ISO_8601, v)
+		return checkError(t, err)
 	default:
 		return time.Time{}
 	}
 }
 
 // Time
-func toTime(v interface{}) time.Time {
-	switch v.(type) {
+func toTime(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		t, _ := time.Parse(TIME_ISO_8601, v.(string))
-		return t
+		t, err := time.Parse(TIME_ISO_8601, v)
+		return checkError(t, err)
 	default:
 		return time.Time{}
 	}
 }
 
 // DateTime
-func toDateTime(v interface{}) time.Time {
-	switch v.(type) {
+func toDateTime(v interface{}) interface{} {
+	switch v := v.(type) {
 	case string:
-		t, _ := time.Parse(DATE_TIME_ISO_8601, v.(string))
-		return t
+		t, err := time.Parse(DATE_TIME_ISO_8601, v)
+		return checkError(t, err)
 	default:
 		return time.Time{}
 	}

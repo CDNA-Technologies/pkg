@@ -6,7 +6,7 @@ const (
 )
 
 type Checker interface {
-	Evaluate(dataset map[string]interface{}) bool
+	Evaluate(dataset map[string]interface{}) interface{}
 }
 
 type RuleGroup struct {
@@ -14,14 +14,17 @@ type RuleGroup struct {
 	Rules     interface{}
 }
 
-func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) bool {
+func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) interface{} {
 	rules := rg.Rules.([]interface{})
-	var res bool
+	var res interface{}
+
 	switch rg.Condition.(string) {
 	case AND:
 		for _, r := range rules {
 			res = rg.getChecker(r.(map[string]interface{})).Evaluate(dataset)
-			if !res {
+			if res == nil {
+				return res
+			} else if !res.(bool) {
 				return false
 			}
 		}
@@ -29,7 +32,9 @@ func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) bool {
 	case OR:
 		for _, r := range rules {
 			res = rg.getChecker(r.(map[string]interface{})).Evaluate(dataset)
-			if res {
+			if res == nil {
+				return res
+			} else if res.(bool) {
 				return true
 			}
 		}

@@ -19,7 +19,7 @@ type Rule struct {
 }
 
 // Evaluate function checks whether the dataset matches with rule
-func (r *Rule) Evaluate(dataset map[string]interface{}) bool {
+func (r *Rule) Evaluate(dataset map[string]interface{}) interface{} {
 	var wg sync.WaitGroup
 	var input, value interface{}
 
@@ -31,6 +31,8 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) bool {
 	wg.Add(2)
 	go func() {
 		input = r.getInputValue(dataset)
+		//fmt.Println("Input is ", input)
+		//if input is null, some error is happening
 		wg.Done()
 	}()
 
@@ -40,6 +42,11 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) bool {
 	}()
 
 	wg.Wait()
+
+	if input == nil {
+		return nil
+	}
+
 	return opr.Evaluate(input, value)
 }
 
@@ -79,6 +86,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) interface{} {
 	}
 
 	iv := r.parseValue(result)
+
 	if r.Sanitize && r.Type == "string" {
 		v := iv.(string)
 		return sanitize(&v)
