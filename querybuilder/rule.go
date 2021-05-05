@@ -26,7 +26,7 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 
 	opr, ok := operator.GetOperator(r.Operator)
 	if !ok {
-		return false, nil
+		return false, err
 	}
 
 	wg.Add(2)
