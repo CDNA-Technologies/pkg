@@ -32,8 +32,7 @@ func toDouble(v interface{}) (interface{}, error) {
 	var err error = nil
 	switch v := v.(type) {
 	case string:
-		f, err := strconv.ParseFloat(v, 64)
-		return f, err
+		return strconv.ParseFloat(v, 64)
 	case float64:
 		return v, err
 	default:
@@ -46,8 +45,7 @@ func toInteger(v interface{}) (interface{}, error) {
 	var err error = nil
 	switch v := v.(type) {
 	case string:
-		i, err := strconv.Atoi(v)
-		return i, err
+		return strconv.Atoi(v)
 	case float64:
 		return int(v), err
 	case int:
@@ -67,8 +65,7 @@ func toBoolean(v interface{}) (interface{}, error) {
 	var err error = nil
 	switch v := v.(type) {
 	case string:
-		b, err := strconv.ParseBool(v)
-		return b, err
+		return strconv.ParseBool(v)
 	case float64:
 		n := int(v)
 		if n == 1 {
@@ -87,8 +84,7 @@ func toDate(v interface{}) (interface{}, error) {
 	var err error = nil
 	switch v := v.(type) {
 	case string:
-		t, err := time.Parse(DATE_ISO_8601, v)
-		return t, err
+		return time.Parse(DATE_ISO_8601, v)
 	default:
 		return time.Time{}, err
 	}
@@ -99,8 +95,7 @@ func toTime(v interface{}) (interface{}, error) {
 	var err error = nil
 	switch v := v.(type) {
 	case string:
-		t, err := time.Parse(TIME_ISO_8601, v)
-		return t, err
+		return time.Parse(TIME_ISO_8601, v)
 	default:
 		return time.Time{}, err
 	}
@@ -111,8 +106,7 @@ func toDateTime(v interface{}) (interface{}, error) {
 	var err error = nil
 	switch v := v.(type) {
 	case string:
-		t, err := time.Parse(DATE_TIME_ISO_8601, v)
-		return t, err
+		return time.Parse(DATE_TIME_ISO_8601, v)
 	default:
 		return time.Time{}, err
 	}
