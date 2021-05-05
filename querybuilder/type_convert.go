@@ -13,8 +13,8 @@ const (
 )
 
 // String
-func toString(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toString(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return v, err
@@ -28,8 +28,8 @@ func toString(v interface{}) (interface{}, interface{}) {
 }
 
 // Double
-func toDouble(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toDouble(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		f, err := strconv.ParseFloat(v, 64)
@@ -42,8 +42,8 @@ func toDouble(v interface{}) (interface{}, interface{}) {
 }
 
 // Integer
-func toInteger(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toInteger(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		i, err := strconv.Atoi(v)
@@ -63,8 +63,8 @@ func toInteger(v interface{}) (interface{}, interface{}) {
 }
 
 // Boolean
-func toBoolean(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toBoolean(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		b, err := strconv.ParseBool(v)
@@ -83,8 +83,8 @@ func toBoolean(v interface{}) (interface{}, interface{}) {
 }
 
 // Date
-func toDate(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toDate(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		t, err := time.Parse(DATE_ISO_8601, v)
@@ -95,8 +95,8 @@ func toDate(v interface{}) (interface{}, interface{}) {
 }
 
 // Time
-func toTime(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toTime(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		t, err := time.Parse(TIME_ISO_8601, v)
@@ -107,8 +107,8 @@ func toTime(v interface{}) (interface{}, interface{}) {
 }
 
 // DateTime
-func toDateTime(v interface{}) (interface{}, interface{}) {
-	var err interface{} = nil
+func toDateTime(v interface{}) (interface{}, error) {
+	var err error = nil
 	switch v := v.(type) {
 	case string:
 		t, err := time.Parse(DATE_TIME_ISO_8601, v)
