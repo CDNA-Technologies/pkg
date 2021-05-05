@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -13,7 +15,7 @@ const (
 )
 
 // String
-func toString(v interface{}) (interface{}, error) {
+func toString(v interface{}) (string, error) {
 	switch v := v.(type) {
 	case string:
 		return v, nil
@@ -22,24 +24,24 @@ func toString(v interface{}) (interface{}, error) {
 	case bool:
 		return fmt.Sprintf("%t", v), nil
 	default:
-		return "", nil
+		return "", errors.Errorf("Invalid datatype given: ", v)
 	}
 }
 
 // Double
-func toDouble(v interface{}) (interface{}, error) {
+func toDouble(v interface{}) (float64, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.ParseFloat(v, 64)
 	case float64:
 		return v, nil
 	default:
-		return 0, nil
+		return 0, errors.Errorf("Invalid datatype given: ", v)
 	}
 }
 
 // Integer
-func toInteger(v interface{}) (interface{}, error) {
+func toInteger(v interface{}) (int, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.Atoi(v)
@@ -53,12 +55,12 @@ func toInteger(v interface{}) (interface{}, error) {
 		}
 		return 0, nil
 	default:
-		return 0, nil
+		return 0, errors.Errorf("Invalid datatype given: ", v)
 	}
 }
 
 // Boolean
-func toBoolean(v interface{}) (interface{}, error) {
+func toBoolean(v interface{}) (bool, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.ParseBool(v)
@@ -71,36 +73,36 @@ func toBoolean(v interface{}) (interface{}, error) {
 	case bool:
 		return v, nil
 	default:
-		return false, nil
+		return false, errors.Errorf("Invalid datatype given: ", v)
 	}
 }
 
 // Date
-func toDate(v interface{}) (interface{}, error) {
+func toDate(v interface{}) (time.Time, error) {
 	switch v := v.(type) {
 	case string:
 		return time.Parse(DATE_ISO_8601, v)
 	default:
-		return time.Time{}, nil
+		return time.Time{}, errors.Errorf("Invalid datatype given: ", v)
 	}
 }
 
 // Time
-func toTime(v interface{}) (interface{}, error) {
+func toTime(v interface{}) (time.Time, error) {
 	switch v := v.(type) {
 	case string:
 		return time.Parse(TIME_ISO_8601, v)
 	default:
-		return time.Time{}, nil
+		return time.Time{}, errors.Errorf("Invalid datatype given: ", v)
 	}
 }
 
 // DateTime
-func toDateTime(v interface{}) (interface{}, error) {
+func toDateTime(v interface{}) (time.Time, error) {
 	switch v := v.(type) {
 	case string:
 		return time.Parse(DATE_TIME_ISO_8601, v)
 	default:
-		return time.Time{}, nil
+		return time.Time{}, errors.Errorf("Invalid datatype given: ", v)
 	}
 }

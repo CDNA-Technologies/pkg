@@ -63,12 +63,15 @@ func TestRuleEvaluate(t *testing.T) {
 
 func BenchmarkRuleEvaluate(b *testing.B) {
 	var ok bool
+	var err error
 
 	for i := 0; i < b.N; i++ {
 		for _, j := range ruleInputs {
-			ok, _ = j.rule.Evaluate(ruleDataset)
+			ok, err = j.rule.Evaluate(ruleDataset)
 		}
 	}
 
-	benchmarkRuleEvaluateResult = ok
+	if err != nil {
+		benchmarkRuleEvaluateResult = ok
+	}
 }

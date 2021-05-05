@@ -3,6 +3,8 @@ package querybuilder
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func parseJson(data string) map[string]interface{} {
@@ -66,7 +68,10 @@ func TestRuleGroupEvaluate(t *testing.T) {
 
 			rg := RuleGroup{Condition: rules["condition"], Rules: rules["rules"]}
 
-			if got, _ := rg.Evaluate(parseJson(input.dataset)); got != input.want {
+			if got, err := rg.Evaluate(parseJson(input.dataset)); got != input.want {
+				if err != nil {
+					errors.Errorf("Caught Error ", err)
+				}
 				t.Error("Evaluate got false, want true")
 			}
 		})

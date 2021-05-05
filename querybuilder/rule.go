@@ -6,6 +6,8 @@ import (
 	"sync"
 
 	"github.com/enjoei/pkg/querybuilder/operator"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 type Rule struct {
@@ -20,33 +22,43 @@ type Rule struct {
 
 // Evaluate function checks whether the dataset matches with rule
 func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
-	var err error = nil
-	var wg sync.WaitGroup
 	var input, value interface{}
+	var wg sync.WaitGroup
+	var errg errgroup.Group
 
 	opr, ok := operator.GetOperator(r.Operator)
 	if !ok {
-		return false, err
+		return false, errors.Errorf("Invalid Operator %s", opr)
 	}
 
 	wg.Add(2)
-	go func() {
-		input, err = r.getInputValue(dataset)
-		wg.Done()
-	}()
 
-	go func() {
+	errg.Go(func() error {
+		var err error
 		value, err = r.getValue()
+		if err != nil {
+			return err
+		}
 		wg.Done()
-	}()
+		return err
+	})
 
-	wg.Wait()
+	errg.Go(func() error {
+		var err error
+		input, err = r.getInputValue(dataset)
+		if err != nil {
+			return err
+		}
+		wg.Done()
+		return err
+	})
 
-	if err != nil {
+	if err := errg.Wait(); err != nil {
 		return false, err
 	}
 
-	return opr.Evaluate(input, value), err
+	wg.Wait()
+	return opr.Evaluate(input, value), nil
 }
 
 func (r *Rule) getValue() (interface{}, error) {
@@ -68,8 +80,8 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 
 	for i := 0; i < steps; i++ {
 		result, ok = rdataset[field[i]]
-		if !ok {
-			return nil, nil
+		if !ok || result == nil {
+			return nil, errors.Errorf("Error in field: %s", field[i])
 		}
 
 		rresult := reflect.ValueOf(result)
@@ -77,10 +89,6 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 			rdataset = result.(map[string]interface{})
 		} else if rresult.Kind() == reflect.Slice && i != (steps-1) {
 			result = rresult.Index(0)
-		}
-
-		if result == nil {
-			return nil, nil
 		}
 	}
 
@@ -95,17 +103,35 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 }
 
 func (r *Rule) parseValue(v interface{}) (interface{}, error) {
-	var err error = nil
-
 	rv := reflect.ValueOf(v)
+
+	var errg errgroup.Group
+	var wg sync.WaitGroup
 
 	if rv.Kind() == reflect.Slice {
 		sv := make([]interface{}, rv.Len())
 
-		for i, vv := range v.([]interface{}) {
-			sv[i], err = r.castValue(vv)
+		wg.Add(rv.Len())
+		for _, vv := range v.([]interface{}) {
+			go func(vv interface{}) {
+				errg.Go(func() error {
+					var err error
+					_, err = r.castValue(vv)
+					if err != nil {
+						return err
+					}
+					return nil
+				})
+			}(vv)
+			wg.Done()
 		}
-		return sv, err
+
+		if err := errg.Wait(); err != nil {
+			return sv, err
+		}
+
+		wg.Wait()
+		return sv, nil
 	}
 
 	return r.castValue(v)
@@ -113,9 +139,6 @@ func (r *Rule) parseValue(v interface{}) (interface{}, error) {
 
 // Available types in jQuery Query Builder are string, integer, double, date, time, datetime and boolean.
 func (r *Rule) castValue(v interface{}) (interface{}, error) {
-	if v == nil {
-		return nil, nil
-	}
 
 	switch r.Type {
 	case "string":
@@ -133,6 +156,6 @@ func (r *Rule) castValue(v interface{}) (interface{}, error) {
 	case "boolean":
 		return toBoolean(v)
 	default:
-		return v, nil
+		return v, errors.Errorf("Invalid datatype: ", r.Type)
 	}
 }
