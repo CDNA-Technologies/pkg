@@ -62,7 +62,7 @@ func TestRuleEvaluate(t *testing.T) {
 }
 
 func BenchmarkRuleEvaluate(b *testing.B) {
-	var ok interface{}
+	var ok bool
 
 	for i := 0; i < b.N; i++ {
 		for _, j := range ruleInputs {
@@ -70,5 +70,5 @@ func BenchmarkRuleEvaluate(b *testing.B) {
 		}
 	}
 
-	benchmarkRuleEvaluateResult = ok.(bool)
+	benchmarkRuleEvaluateResult = ok
 }
