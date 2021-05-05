@@ -14,100 +14,93 @@ const (
 
 // String
 func toString(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
-		return v, err
+		return v, nil
 	case float64:
-		return fmt.Sprintf("%f", v), err
+		return fmt.Sprintf("%f", v), nil
 	case bool:
-		return fmt.Sprintf("%t", v), err
+		return fmt.Sprintf("%t", v), nil
 	default:
-		return "", err
+		return "", nil
 	}
 }
 
 // Double
 func toDouble(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return strconv.ParseFloat(v, 64)
 	case float64:
-		return v, err
+		return v, nil
 	default:
-		return 0, err
+		return 0, nil
 	}
 }
 
 // Integer
 func toInteger(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return strconv.Atoi(v)
 	case float64:
-		return int(v), err
+		return int(v), nil
 	case int:
-		return v, err
+		return v, nil
 	case bool:
 		if v {
-			return 1, err
+			return 1, nil
 		}
-		return 0, err
+		return 0, nil
 	default:
-		return 0, err
+		return 0, nil
 	}
 }
 
 // Boolean
 func toBoolean(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return strconv.ParseBool(v)
 	case float64:
 		n := int(v)
 		if n == 1 {
-			return true, err
+			return true, nil
 		}
-		return false, err
+		return false, nil
 	case bool:
-		return v, err
+		return v, nil
 	default:
-		return false, err
+		return false, nil
 	}
 }
 
 // Date
 func toDate(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return time.Parse(DATE_ISO_8601, v)
 	default:
-		return time.Time{}, err
+		return time.Time{}, nil
 	}
 }
 
 // Time
 func toTime(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return time.Parse(TIME_ISO_8601, v)
 	default:
-		return time.Time{}, err
+		return time.Time{}, nil
 	}
 }
 
 // DateTime
 func toDateTime(v interface{}) (interface{}, error) {
-	var err error = nil
 	switch v := v.(type) {
 	case string:
 		return time.Parse(DATE_TIME_ISO_8601, v)
 	default:
-		return time.Time{}, err
+		return time.Time{}, nil
 	}
 }

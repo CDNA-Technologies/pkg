@@ -16,36 +16,30 @@ type RuleGroup struct {
 
 func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) (bool, error) {
 	rules := rg.Rules.([]interface{})
-	var evaluationResponse bool
-	var err error = nil
 
 	switch rg.Condition.(string) {
 	case AND:
 		for _, r := range rules {
 			getCheckerResponse := rg.getChecker(r.(map[string]interface{}))
 			evaluationResponse, err := getCheckerResponse.Evaluate(dataset)
-			if err != nil {
+			if err != nil || !evaluationResponse {
 				return evaluationResponse, err
-			} else if !evaluationResponse {
-				return false, err
 			}
 		}
-		return true, err
+		return true, nil
 
 	case OR:
 		for _, r := range rules {
 			getCheckerResponse := rg.getChecker(r.(map[string]interface{}))
-			evaluationResponse, error := getCheckerResponse.Evaluate(dataset)
-			if error != nil {
-				return evaluationResponse, error
-			} else if evaluationResponse {
-				return true, error
+			evaluationResponse, err := getCheckerResponse.Evaluate(dataset)
+			if err != nil || evaluationResponse {
+				return evaluationResponse, err
 			}
 		}
-		return false, err
+		return false, nil
 
 	default:
-		return evaluationResponse, err
+		return false, nil
 	}
 }
 

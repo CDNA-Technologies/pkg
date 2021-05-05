@@ -42,7 +42,7 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 
 	wg.Wait()
 
-	if input == nil {
+	if err != nil {
 		return false, err
 	}
 
@@ -57,7 +57,6 @@ func (r *Rule) getValue() (interface{}, error) {
 func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error) {
 	var rdataset = make(map[string]interface{})
 	var result interface{}
-	var err error = nil
 	var ok bool
 
 	for k, v := range dataset {
@@ -70,7 +69,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 	for i := 0; i < steps; i++ {
 		result, ok = rdataset[field[i]]
 		if !ok {
-			return nil, err
+			return nil, nil
 		}
 
 		rresult := reflect.ValueOf(result)
@@ -81,7 +80,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 		}
 
 		if result == nil {
-			return nil, err
+			return nil, nil
 		}
 	}
 
