@@ -70,7 +70,7 @@ func TestRuleGroupEvaluate(t *testing.T) {
 
 			if got, err := rg.Evaluate(parseJson(input.dataset)); got != input.want {
 				if err != nil {
-					errors.Errorf("Caught Error ", err)
+					errors.Errorf("Caught Error %s", err)
 				}
 				t.Error("Evaluate got false, want true")
 			}

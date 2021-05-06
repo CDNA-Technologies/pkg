@@ -28,7 +28,7 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 
 	opr, ok := operator.GetOperator(r.Operator)
 	if !ok {
-		return false, errors.Errorf("Invalid Operator %s", opr)
+		return false, errors.Errorf("Invalid Operator %s", r.Operator)
 	}
 
 	wg.Add(2)
@@ -156,6 +156,6 @@ func (r *Rule) castValue(v interface{}) (interface{}, error) {
 	case "boolean":
 		return toBoolean(v)
 	default:
-		return v, errors.Errorf("Invalid datatype: ", r.Type)
+		return v, errors.Errorf("Invalid datatype: %s", r.Type)
 	}
 }
