@@ -19,11 +19,11 @@ type RuleGroup struct {
 func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) (bool, error) {
 	rules := rg.Rules.([]interface{})
 	var ok bool
-	var err error
 
 	switch rg.Condition.(string) {
 	case AND:
 		for _, r := range rules {
+			var err error
 			ok, err = rg.getChecker(r.(map[string]interface{})).Evaluate(dataset)
 			if err != nil {
 				return false, err
@@ -35,6 +35,7 @@ func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) (bool, error) {
 
 	case OR:
 		for _, r := range rules {
+			var err error
 			ok, err = rg.getChecker(r.(map[string]interface{})).Evaluate(dataset)
 			if err != nil {
 				return false, err
