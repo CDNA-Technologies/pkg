@@ -29,8 +29,12 @@ func TestMatch(t *testing.T) {
 
 	for _, input := range inputs {
 		t.Run(input.title, func(t *testing.T) {
-			if got, _ := qb.Match(parseJson(input.dataset)); got != input.want {
-				t.Errorf("Match got %t, want %t", got, input.want)
+			if got, err := qb.Match(parseJson(input.dataset)); got != input.want {
+				if err == nil {
+					t.Errorf("match got %t, want %t", got, input.want)
+				} else {
+					t.Errorf("caught error %s", err)
+				}
 			}
 		})
 	}

@@ -3,7 +3,6 @@ package querybuilder
 import (
 	"reflect"
 	"strings"
-	"sync"
 
 	"github.com/enjoei/pkg/querybuilder/operator"
 	"github.com/pkg/errors"
@@ -23,15 +22,12 @@ type Rule struct {
 // Evaluate function checks whether the dataset matches with rule
 func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 	var input, value interface{}
-	var wg sync.WaitGroup
 	var errg errgroup.Group
 
 	opr, ok := operator.GetOperator(r.Operator)
 	if !ok {
-		return false, errors.Errorf("Invalid Operator %s", r.Operator)
+		return false, errors.Errorf("invalid Operator %s", r.Operator)
 	}
-
-	wg.Add(2)
 
 	errg.Go(func() error {
 		var err error
@@ -39,7 +35,6 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 		if err != nil {
 			return err
 		}
-		wg.Done()
 		return err
 	})
 
@@ -49,7 +44,6 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 		if err != nil {
 			return err
 		}
-		wg.Done()
 		return err
 	})
 
@@ -57,7 +51,6 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 		return false, err
 	}
 
-	wg.Wait()
 	return opr.Evaluate(input, value), nil
 }
 
@@ -81,7 +74,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 	for i := 0; i < steps; i++ {
 		result, ok = rdataset[field[i]]
 		if !ok || result == nil {
-			return nil, errors.Errorf("Error in field: %s", field[i])
+			return nil, errors.Errorf("error in field: %s", field[i])
 		}
 
 		rresult := reflect.ValueOf(result)
@@ -105,32 +98,16 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 func (r *Rule) parseValue(v interface{}) (interface{}, error) {
 	rv := reflect.ValueOf(v)
 
-	var errg errgroup.Group
-	var wg sync.WaitGroup
-
 	if rv.Kind() == reflect.Slice {
 		sv := make([]interface{}, rv.Len())
 
-		wg.Add(rv.Len())
-		for _, vv := range v.([]interface{}) {
-			go func(vv interface{}) {
-				errg.Go(func() error {
-					var err error
-					_, err = r.castValue(vv)
-					if err != nil {
-						return err
-					}
-					return nil
-				})
-			}(vv)
-			wg.Done()
+		for i, vv := range v.([]interface{}) {
+			var err error
+			sv[i], err = r.castValue(vv)
+			if err != nil {
+				return nil, err
+			}
 		}
-
-		if err := errg.Wait(); err != nil {
-			return sv, err
-		}
-
-		wg.Wait()
 		return sv, nil
 	}
 
@@ -156,6 +133,6 @@ func (r *Rule) castValue(v interface{}) (interface{}, error) {
 	case "boolean":
 		return toBoolean(v)
 	default:
-		return v, errors.Errorf("Invalid datatype: %s", r.Type)
+		return v, errors.Errorf("invalid datatype: %s", r.Type)
 	}
 }
