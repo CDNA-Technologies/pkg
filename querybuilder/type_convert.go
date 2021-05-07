@@ -24,7 +24,7 @@ func toString(v interface{}) (string, error) {
 	case bool:
 		return fmt.Sprintf("%t", v), nil
 	default:
-		return "", errors.Errorf("invalid datatype given: %s", v)
+		return "", errors.Errorf("expected string but got %s", v)
 	}
 }
 
@@ -36,7 +36,7 @@ func toDouble(v interface{}) (float64, error) {
 	case float64:
 		return v, nil
 	default:
-		return 0, errors.Errorf("invalid datatype given: %s", v)
+		return 0, errors.Errorf("iexpected float but got %s", v)
 	}
 }
 
@@ -55,7 +55,7 @@ func toInteger(v interface{}) (int, error) {
 		}
 		return 0, nil
 	default:
-		return 0, errors.Errorf("invalid datatype given: %s", v)
+		return 0, errors.Errorf("expected integer but got %s", v)
 	}
 }
 
@@ -73,7 +73,7 @@ func toBoolean(v interface{}) (bool, error) {
 	case bool:
 		return v, nil
 	default:
-		return false, errors.Errorf("invalid datatype given: %s", v)
+		return false, errors.Errorf("expected boolean but got %s", v)
 	}
 }
 
@@ -83,7 +83,7 @@ func toDate(v interface{}) (time.Time, error) {
 	case string:
 		return time.Parse(DATE_ISO_8601, v)
 	default:
-		return time.Time{}, errors.Errorf("invalid datatype given: %s", v)
+		return time.Time{}, errors.Errorf("expected date but got %s", v)
 	}
 }
 
@@ -93,7 +93,7 @@ func toTime(v interface{}) (time.Time, error) {
 	case string:
 		return time.Parse(TIME_ISO_8601, v)
 	default:
-		return time.Time{}, errors.Errorf("invalid datatype given: %s", v)
+		return time.Time{}, errors.Errorf("expected time but got %s", v)
 	}
 }
 
@@ -103,6 +103,6 @@ func toDateTime(v interface{}) (time.Time, error) {
 	case string:
 		return time.Parse(DATE_TIME_ISO_8601, v)
 	default:
-		return time.Time{}, errors.Errorf("invalid datatype given: %s", v)
+		return time.Time{}, errors.Errorf("expected datetime but got %s", v)
 	}
 }
