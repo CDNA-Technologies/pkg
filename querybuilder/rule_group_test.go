@@ -106,7 +106,7 @@ func TestRuleGroupEvaluate(t *testing.T) {
 			if got, err := rg.Evaluate(parseJson(input.dataset)); input.err != fmt.Sprint(err) {
 				t.Errorf("Unexpected error %s wanted %s", err, input.err)
 			} else if got != input.want {
-				t.Errorf("Expected %t, got %t", input.want, got)
+				t.Errorf("Got %t, expected %t", got, input.want)
 			}
 		})
 	}
