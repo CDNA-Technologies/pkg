@@ -35,7 +35,7 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 		if err != nil {
 			return err
 		}
-		return err
+		return nil
 	})
 
 	errg.Go(func() error {
@@ -44,7 +44,7 @@ func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
 		if err != nil {
 			return err
 		}
-		return err
+		return nil
 	})
 
 	if err := errg.Wait(); err != nil {
@@ -98,27 +98,16 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 func (r *Rule) parseValue(v interface{}) (interface{}, error) {
 	rv := reflect.ValueOf(v)
 
-	var errg errgroup.Group
-
 	if rv.Kind() == reflect.Slice {
 		sv := make([]interface{}, rv.Len())
 
-		for _, vv := range v.([]interface{}) {
-			go func(vv interface{}) {
-				errg.Go(func() error {
-					_, err := r.castValue(vv)
-					if err != nil {
-						return err
-					}
-					return nil
-				})
-			}(vv)
+		for i, vv := range v.([]interface{}) {
+			var err error
+			sv[i], err = r.castValue(vv)
+			if err != nil {
+				return nil, err
+			}
 		}
-
-		if err := errg.Wait(); err != nil {
-			return nil, err
-		}
-
 		return sv, nil
 	}
 

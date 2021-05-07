@@ -31,7 +31,7 @@ func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) (bool, error) {
 				return false, nil
 			}
 		}
-		return ok, nil
+		return true, nil
 
 	case OR:
 		for _, r := range rules {
@@ -43,7 +43,7 @@ func (rg *RuleGroup) Evaluate(dataset map[string]interface{}) (bool, error) {
 				return true, nil
 			}
 		}
-		return ok, nil
+		return false, nil
 
 	default:
 		return false, errors.Errorf("invalid Condition %s", rg.Condition)

@@ -2,6 +2,7 @@ package querybuilder
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 )
 
@@ -64,6 +65,13 @@ var ruleset = []string{
 				{"id": "int_equal","field": "int_equal","type": "integer","input": "text","operator": "equal","value": 50}
 			]}
 		]}`,
+	`{
+		"condition": "AND",
+		"rules": [
+			{"id": "int_equal_1", "field": "int_equal_1", "type": "integer", "input": "select", "operator": "equal", "value": "1"},
+			{"id": "float_greater_or_equal","field": "float_greater_or_equal","type": "double","input": "text","operator": "greater_or_equal","value": "99"},
+			{"id": "int_equal_2", "field": "int_equal_2", "type": "integer", "input": "text", "operator": "equal", "value": "0"}
+	]}`,
 }
 
 func TestRuleGroupEvaluate(t *testing.T) {
@@ -72,16 +80,18 @@ func TestRuleGroupEvaluate(t *testing.T) {
 		rules   string
 		dataset string
 		want    bool
+		err     string
 	}{
-		{"(1) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.7}`, true},
-		{"(2) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 4, "int_greater":  3,"float_greater": 7.7}`, false},
-		{"(3) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  1, "float_greater": 7.7}`, false},
-		{"(4) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4, "int_greater":  3, "float_greater": 7.7}`, true},
-		{"(5) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  1,"float_greater": 7.7}`, true},
-		{"(6) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.9}`, true},
-		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "1.2", "datetime_greater": "2021-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, true},
-		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "20a", "datetime_greater": "2020-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, false},
-		{"(8) OR & AND", ruleset[4], `{"int_lesser":  "2", "string_contains": "test_cricket", "time_lesser": "02:04:59" ,"int_equal": 10}`, true},
+		{"(1) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.7}`, true, `<nil>`},
+		{"(2) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 4, "int_greater":  3,"float_greater": 7.7}`, false, `<nil>`},
+		{"(3) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  1, "float_greater": 7.7}`, false, `<nil>`},
+		{"(4) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4, "int_greater":  3, "float_greater": 7.7}`, true, `<nil>`},
+		{"(5) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  1,"float_greater": 7.7}`, true, `<nil>`},
+		{"(6) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.9}`, true, `<nil>`},
+		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "1.2", "datetime_greater": "2021-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, true, `<nil>`},
+		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "20a", "datetime_greater": "2020-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, `strconv.ParseFloat: parsing "20a": invalid syntax`},
+		{"(8) OR & AND", ruleset[4], `{"int_lesser":  "2a", "string_contains": "test_cricket", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, `strconv.Atoi: parsing "2a": invalid syntax`},
+		{"(9) only AND", ruleset[5], `{"float_greater_or_equal": "100.0", "int_equal_1": "1Recharge", "int_equal_2": "0"}`, false, `strconv.Atoi: parsing "1Recharge": invalid syntax`},
 	}
 
 	for _, input := range inputs {
@@ -93,8 +103,10 @@ func TestRuleGroupEvaluate(t *testing.T) {
 
 			rg := RuleGroup{Condition: rules["condition"], Rules: rules["rules"]}
 
-			if got, err := rg.Evaluate(parseJson(input.dataset)); got != input.want {
-				t.Errorf("Caught error %s and returned %t", err, got)
+			if got, err := rg.Evaluate(parseJson(input.dataset)); input.err != fmt.Sprint(err) {
+				t.Errorf("Unexpected error %s wanted %s", err, input.err)
+			} else if got != input.want {
+				t.Errorf("Expected %t, got %t", input.want, got)
 			}
 		})
 	}
