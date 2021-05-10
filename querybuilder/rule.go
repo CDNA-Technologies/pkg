@@ -86,13 +86,16 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 	}
 
 	iv, err := r.parseValue(result)
+	if err != nil {
+		return iv, err
+	}
 
 	if r.Sanitize && r.Type == "string" {
 		v := iv.(string)
 		return sanitize(&v), err
 	}
 
-	return iv, err
+	return iv, nil
 }
 
 func (r *Rule) parseValue(v interface{}) (interface{}, error) {

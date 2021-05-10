@@ -2,8 +2,9 @@ package querybuilder
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func parseJson(data string) map[string]interface{} {
@@ -80,18 +81,18 @@ func TestRuleGroupEvaluate(t *testing.T) {
 		rules   string
 		dataset string
 		want    bool
-		err     string
+		err     error
 	}{
-		{"(1) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.7}`, true, `<nil>`},
-		{"(2) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 4, "int_greater":  3,"float_greater": 7.7}`, false, `<nil>`},
-		{"(3) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  1, "float_greater": 7.7}`, false, `<nil>`},
-		{"(4) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4, "int_greater":  3, "float_greater": 7.7}`, true, `<nil>`},
-		{"(5) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  1,"float_greater": 7.7}`, true, `<nil>`},
-		{"(6) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.9}`, true, `<nil>`},
-		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "1.2", "datetime_greater": "2021-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, true, `<nil>`},
-		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "20a", "datetime_greater": "2020-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, `strconv.ParseFloat: parsing "20a": invalid syntax`},
-		{"(8) OR & AND", ruleset[4], `{"int_lesser":  "2a", "string_contains": "test_cricket", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, `strconv.Atoi: parsing "2a": invalid syntax`},
-		{"(9) only AND", ruleset[5], `{"float_greater_or_equal": "100.0", "int_equal_1": "1Recharge", "int_equal_2": "0"}`, false, `strconv.Atoi: parsing "1Recharge": invalid syntax`},
+		{"(1) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.7}`, true, nil},
+		{"(2) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 4, "int_greater":  3,"float_greater": 7.7}`, false, nil},
+		{"(3) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  1, "float_greater": 7.7}`, false, nil},
+		{"(4) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4, "int_greater":  3, "float_greater": 7.7}`, true, nil},
+		{"(5) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  1,"float_greater": 7.7}`, true, nil},
+		{"(6) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.9}`, true, nil},
+		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "1.2", "datetime_greater": "2021-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, true, nil},
+		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "20a", "datetime_greater": "2020-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, errors.Errorf(`strconv.ParseFloat: parsing "20a": invalid syntax`)},
+		{"(8) OR & AND", ruleset[4], `{"int_lesser":  "2a", "string_contains": "test_cricket", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, errors.Errorf(`strconv.Atoi: parsing "2a": invalid syntax`)},
+		{"(9) only AND", ruleset[5], `{"float_greater_or_equal": "100.0", "int_equal_1": "1Recharge", "int_equal_2": "0"}`, false, errors.Errorf(`strconv.Atoi: parsing "1Recharge": invalid syntax`)},
 	}
 
 	for _, input := range inputs {
@@ -103,7 +104,7 @@ func TestRuleGroupEvaluate(t *testing.T) {
 
 			rg := RuleGroup{Condition: rules["condition"], Rules: rules["rules"]}
 
-			if got, err := rg.Evaluate(parseJson(input.dataset)); input.err != fmt.Sprint(err) {
+			if got, err := rg.Evaluate(parseJson(input.dataset)); err != nil && input.err.Error() != err.Error() { // nil==nil is false, so we make sure both aren't nil by checking one
 				t.Errorf("Unexpected error %s wanted %s", err, input.err)
 			} else if got != input.want {
 				t.Errorf("Got %t, expected %t", got, input.want)
