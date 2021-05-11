@@ -44,16 +44,6 @@ func toDouble(v interface{}) (float64, error) {
 	}
 }
 
-// Nil
-func toNil(v interface{}) (interface{}, error) {
-	switch v := v.(type) {
-	case nil:
-		return nil, nil
-	default:
-		return nil, errors.Errorf("expected nil but got %v", v)
-	}
-}
-
 // Integer
 func toInteger(v interface{}) (int, error) {
 	switch v := v.(type) {

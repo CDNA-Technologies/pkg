@@ -99,6 +99,10 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 }
 
 func (r *Rule) parseValue(v interface{}) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+
 	rv := reflect.ValueOf(v)
 
 	if rv.Kind() == reflect.Slice {
@@ -135,8 +139,6 @@ func (r *Rule) castValue(v interface{}) (interface{}, error) {
 		return toDateTime(v)
 	case "boolean":
 		return toBoolean(v)
-	case "nil": //to handle nil inputs - none of the other datatypes handle
-		return toNil(v)
 	default:
 		return v, errors.Errorf("invalid datatype: %s", r.Type)
 	}
