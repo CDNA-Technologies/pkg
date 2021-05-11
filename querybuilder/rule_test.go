@@ -20,10 +20,11 @@ var ruleInputs = []struct {
 	{&Rule{ID: "string05", Field: "string", Type: "string", Input: "text", Operator: "ends_with", Value: "tests"}, true, nil},
 	{&Rule{ID: "string06", Field: "string", Type: "string", Input: "text", Operator: "greater", Value: "my text for test"}, true, nil},
 	{&Rule{ID: "string07", Field: "string", Type: "string", Input: "text", Operator: "greater_or_equal", Value: "my text for tests"}, true, nil},
-	{&Rule{ID: "string08", Field: "string_empty", Type: "string", Input: "text", Operator: "is_empty", Value: ""}, true, nil},
+	{&Rule{ID: "string08", Field: "string_empty", Type: "string", Input: "text", Operator: "is_empty", Value: "a"}, true, nil},
 	{&Rule{ID: "string09", Field: "string", Type: "string", Input: "text", Operator: "match_with", Value: `/text\sfor/`}, true, nil},
 	{&Rule{ID: "string10", Field: "string", Type: "string", Input: "text", Operator: "match_with", Sanitize: true, Value: `/textfor/`}, true, nil},
 	{&Rule{ID: "double01", Field: "double", Type: "double", Input: "text", Operator: "between", Value: []interface{}{1.0, 2.0}}, true, nil},
+	{&Rule{ID: "double02", Field: "double", Type: "double", Input: "text", Operator: "equal", Value: 1.2}, true, nil},
 	{&Rule{ID: "double03", Field: "double", Type: "double", Input: "text", Operator: "greater", Value: 1.3}, false, nil},
 	{&Rule{ID: "double04", Field: "double", Type: "double", Input: "text", Operator: "greater_or_equal", Value: 1.2}, true, nil},
 	{&Rule{ID: "integer01", Field: "integer", Type: "integer", Input: "text", Operator: "between", Value: []interface{}{1.0, 3.0}}, true, nil},
@@ -32,12 +33,12 @@ var ruleInputs = []struct {
 	{&Rule{ID: "integer04", Field: "integer", Type: "integer", Input: "text", Operator: "greater", Value: 1.0}, true, nil},
 	{&Rule{ID: "integer05", Field: "integer", Type: "integer", Input: "text", Operator: "greater_or_equal", Value: 1.0}, true, nil},
 	{&Rule{ID: "integer06", Field: "integer", Type: "integer", Input: "text", Operator: "in", Value: []interface{}{1.0, 2.0, 3.0}}, true, nil},
-	{&Rule{ID: "integer07", Field: "list_empty", Type: "integer", Input: "text", Operator: "is_empty", Value: []interface{}{}}, true, nil},
+	{&Rule{ID: "integer07", Field: "list_empty", Type: "integer", Input: "text", Operator: "is_empty", Value: []interface{}{1.0}}, true, nil},
 	{&Rule{ID: "date01", Field: "date", Type: "date", Input: "text", Operator: "between", Value: []interface{}{"2019-12-31", "2020-01-02"}}, true, nil},
-	{&Rule{ID: "date02", Field: "date", Type: "date", Input: "text", Operator: "greater", Value: "2019-12-31"}, true, nil},
+	{&Rule{ID: "field_nil", Field: "field_nil", Type: "double", Input: "text", Operator: "is_null", Value: 1}, false, errors.Errorf(`expected float but got <nil>`)},
 	{&Rule{ID: "date03", Field: "date", Type: "date", Input: "text", Operator: "greater_or_equal", Value: "2019-12-31"}, true, nil},
-	{&Rule{ID: "field_nil", Field: "field_nil", Type: "double", Input: "text", Operator: "is_null", Value: 1}, false, nil},
-	{&Rule{ID: "integer04", Field: "fields.integer", Type: "integer", Input: "text", Operator: "equal", Value: "5a"}, false, errors.Errorf(`strconv.Atoi: parsing "5a": invalid syntax`)},
+	{&Rule{ID: "field_nil", Field: "field_nil", Type: "double", Input: "text", Operator: "is_null", Value: 1}, false, errors.Errorf(`expected float but got <nil>`)},
+	{&Rule{ID: "integer08", Field: "fields.integer", Type: "integer", Input: "text", Operator: "equal", Value: "5a"}, false, errors.Errorf(`strconv.Atoi: parsing "5a": invalid syntax`)},
 }
 
 var typeNil interface{}
@@ -57,8 +58,10 @@ var ruleDataset = map[string]interface{}{
 func TestRuleEvaluate(t *testing.T) {
 	for _, i := range ruleInputs {
 		t.Run(i.rule.ID, func(t *testing.T) {
-			if ok, err := i.rule.Evaluate(ruleDataset); i.err != nil && i.err.Error() != err.Error() { // nil==nil is false, so we make sure both aren't nil by checking one
-				t.Errorf("Expected error %s, got %s", err, i.err)
+			if ok, err := i.rule.Evaluate(ruleDataset); err != nil {
+				if i.err.Error() != err.Error() {
+					t.Errorf("Unexpected error %s, expected %s", err.Error(), i.err.Error())
+				}
 			} else if i.want != ok {
 				t.Errorf("Expected %t, got %t", i.want, ok)
 			}

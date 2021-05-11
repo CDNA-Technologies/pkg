@@ -21,10 +21,12 @@ func toString(v interface{}) (string, error) {
 		return v, nil
 	case float64:
 		return fmt.Sprintf("%f", v), nil
+	case int:
+		return fmt.Sprintf("%d", v), nil
 	case bool:
 		return fmt.Sprintf("%t", v), nil
 	default:
-		return "", errors.Errorf("expected string but got %s", v)
+		return "", errors.Errorf("expected string but got %v", v)
 	}
 }
 
@@ -35,8 +37,10 @@ func toDouble(v interface{}) (float64, error) {
 		return strconv.ParseFloat(v, 64)
 	case float64:
 		return v, nil
+	case int:
+		return float64(v), nil
 	default:
-		return 0, errors.Errorf("iexpected float but got %s", v)
+		return 0, errors.Errorf("expected float but got %v", v)
 	}
 }
 
@@ -55,7 +59,7 @@ func toInteger(v interface{}) (int, error) {
 		}
 		return 0, nil
 	default:
-		return 0, errors.Errorf("expected integer but got %s", v)
+		return 0, errors.Errorf("expected integer but got %v", v)
 	}
 }
 
@@ -73,7 +77,7 @@ func toBoolean(v interface{}) (bool, error) {
 	case bool:
 		return v, nil
 	default:
-		return false, errors.Errorf("expected boolean but got %s", v)
+		return false, errors.Errorf("expected boolean but got %v", v)
 	}
 }
 
@@ -83,7 +87,7 @@ func toDate(v interface{}) (time.Time, error) {
 	case string:
 		return time.Parse(DATE_ISO_8601, v)
 	default:
-		return time.Time{}, errors.Errorf("expected date but got %s", v)
+		return time.Time{}, errors.Errorf("expected date but got %v", v)
 	}
 }
 
@@ -93,7 +97,7 @@ func toTime(v interface{}) (time.Time, error) {
 	case string:
 		return time.Parse(TIME_ISO_8601, v)
 	default:
-		return time.Time{}, errors.Errorf("expected time but got %s", v)
+		return time.Time{}, errors.Errorf("expected time but got %v", v)
 	}
 }
 
@@ -103,6 +107,6 @@ func toDateTime(v interface{}) (time.Time, error) {
 	case string:
 		return time.Parse(DATE_TIME_ISO_8601, v)
 	default:
-		return time.Time{}, errors.Errorf("expected datetime but got %s", v)
+		return time.Time{}, errors.Errorf("expected datetime but got %v", v)
 	}
 }

@@ -73,7 +73,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 
 	for i := 0; i < steps; i++ {
 		result, ok = rdataset[field[i]]
-		if !ok || result == nil {
+		if !ok {
 			return nil, errors.Errorf("error in field: %s", field[i])
 		}
 
@@ -92,7 +92,7 @@ func (r *Rule) getInputValue(dataset map[string]interface{}) (interface{}, error
 
 	if r.Sanitize && r.Type == "string" {
 		v := iv.(string)
-		return sanitize(&v), err
+		return sanitize(&v)
 	}
 
 	return iv, nil
