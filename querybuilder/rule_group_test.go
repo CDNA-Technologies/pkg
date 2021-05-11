@@ -84,11 +84,11 @@ func TestRuleGroupEvaluate(t *testing.T) {
 		err     error
 	}{
 		{"(1) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.7}`, true, nil},
-		{"(2) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 4, "int_greater":  3,"float_greater": 7.7}`, false, nil},
-		{"(3) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  1, "float_greater": 7.7}`, false, nil},
-		{"(4) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4, "int_greater":  3, "float_greater": 7.7}`, true, nil},
+		{"(2) only AND", ruleset[0], `{"float_equal":  1.2, "int_equal": 4.5, "int_greater":  3,"float_greater": 7.7}`, false, nil},
+		{"(3) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  3,"float_greater": 7.7}`, true, nil},
+		{"(4) only OR", ruleset[1], `{"float_equal":  1.3, "int_equal": 4.5, "int_greater":  1,"float_greater": 7.7}`, false, nil},
 		{"(5) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  1,"float_greater": 7.7}`, true, nil},
-		{"(6) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.9}`, true, nil},
+		{"(6) AND & OR", ruleset[2], `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3,"float_greater": 7.4}`, false, nil},
 		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "1.2", "datetime_greater": "2021-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, true, nil},
 		{"(7) AND & OR", ruleset[3], `{"float_greater_or_equal":  "20a", "datetime_greater": "2020-02-01T21:21:24", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, errors.Errorf(`strconv.ParseFloat: parsing "20a": invalid syntax`)},
 		{"(8) OR & AND", ruleset[4], `{"int_lesser":  "2a", "string_contains": "test_cricket", "time_lesser": "02:04:59" ,"int_equal": 10}`, false, errors.Errorf(`strconv.Atoi: parsing "2a": invalid syntax`)},
