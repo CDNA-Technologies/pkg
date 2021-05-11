@@ -35,7 +35,7 @@ func TestMatch(t *testing.T) {
 
 	for _, input := range inputs {
 		t.Run(input.title, func(t *testing.T) {
-			if got, err := qb.Match(parseJson(input.dataset)); err != nil && input.err.Error() != err.Error() { // nil==nil is false, so we make sure both aren't nil by checking one
+			if got, err := qb.Match(parseJson(input.dataset)); err != nil && input.err.Error() != err.Error() {
 				t.Errorf("Unexpected error %s, got %s", err, input.err)
 			} else if got != input.want {
 				t.Errorf("Expected %t, got %t", input.want, got)

@@ -58,10 +58,8 @@ var ruleDataset = map[string]interface{}{
 func TestRuleEvaluate(t *testing.T) {
 	for _, i := range ruleInputs {
 		t.Run(i.rule.ID, func(t *testing.T) {
-			if ok, err := i.rule.Evaluate(ruleDataset); err != nil {
-				if i.err.Error() != err.Error() {
-					t.Errorf("Unexpected error %s, expected %s", err.Error(), i.err.Error())
-				}
+			if ok, err := i.rule.Evaluate(ruleDataset); err != nil && i.err.Error() != err.Error() {
+				t.Errorf("Unexpected error %s, expected %s", err.Error(), i.err.Error())
 			} else if i.want != ok {
 				t.Errorf("Expected %t, got %t", i.want, ok)
 			}
