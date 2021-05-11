@@ -26,9 +26,11 @@ func TestMatch(t *testing.T) {
 	}{
 		{"dt-01", `{"float_equal":  1.0, "int_equal": 5, "int_greater":  3, "float_greater": 7.7}`, false, nil},
 		{"dt-02", `{"float_equal":  1.2, "int_equal": 5, "int_greater":  3, "float_greater": 7.7}`, true, nil},
-		{"dt-03", `{"float_equal":  1.5, "int_equal": 5, "int_greater":  3, "float_greater": 2.2}`, false, nil},
-		{"dt-04", `{"float_equal":  1.2, "int_equal": 0, "int_greater":  10, "float_greater": 7.7}`, true, nil},
-		{"dt-05", `{"float_equal":  1.2, "int_equal": 0, "int_greater":  "1a", "float_greater": 7.7}`, false, errors.Errorf(`strconv.Atoi: parsing "1a": invalid syntax`)},
+		{"dt-03", `{"float_equal":  1.2}`, false, errors.Errorf(`error in field: float_greater`)},
+		{"dt-04", `{"int_greater":  3}`, false, errors.Errorf(`error in field: float_equal`)},
+		{"dt-05", `{"float_equal":  1.5, "int_equal": 5, "int_greater":  3, "float_greater": 2.2}`, false, nil},
+		{"dt-06", `{"float_equal":  1.2, "int_equal": 0, "int_greater":  10, "float_greater": 7.7}`, true, nil},
+		{"dt-07", `{"float_equal":  1.2, "int_equal": 0, "int_greater":  "1a", "float_greater": 7.7}`, false, errors.Errorf(`strconv.Atoi: parsing "1a": invalid syntax`)},
 	}
 
 	qb := New(parseJson(rulesetStr))
