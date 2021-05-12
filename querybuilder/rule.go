@@ -123,6 +123,9 @@ func (r *Rule) parseValue(v interface{}) (interface{}, error) {
 
 // Available types in jQuery Query Builder are string, integer, double, date, time, datetime and boolean.
 func (r *Rule) castValue(v interface{}) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
 
 	switch r.Type {
 	case "string":
