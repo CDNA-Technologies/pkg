@@ -44,6 +44,7 @@ var ruleInputs = []struct {
 	{&Rule{ID: "date03", Field: "date", Type: "date", Input: "text", Operator: "between", Value: []interface{}{"2019-12-30", "2020-12-31"}}, true, nil},
 	{&Rule{ID: "string12", Field: "string", Type: "string", Input: "text", Operator: "match_with", Value: `/text\sfr/`}, false, nil},
 	{&Rule{ID: "integer10", Field: "integer", Type: "integer", Input: "text", Operator: "in", Value: []interface{}{11.0, 12.0, 13.0}}, false, nil},
+	{&Rule{ID: "integer11", Field: "integer", Type: "integer", Input: "text", Operator: "in", Value: []interface{}{}}, false, nil},
 }
 
 var typeNil interface{}
