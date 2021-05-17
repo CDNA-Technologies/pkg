@@ -6,7 +6,6 @@ import (
 
 	"github.com/enjoei/pkg/querybuilder/operator"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 )
 
 type Rule struct {
@@ -21,33 +20,18 @@ type Rule struct {
 
 // Evaluate function checks whether the dataset matches with rule
 func (r *Rule) Evaluate(dataset map[string]interface{}) (bool, error) {
-	var input, value interface{}
-	var errg errgroup.Group
-
 	opr, ok := operator.GetOperator(r.Operator)
 	if !ok {
 		return false, errors.Errorf("invalid Operator %s", r.Operator)
 	}
 
-	errg.Go(func() error {
-		var err error
-		value, err = r.getValue()
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+	value, err := r.getValue()
+	if err != nil {
+		return false, err
+	}
 
-	errg.Go(func() error {
-		var err error
-		input, err = r.getInputValue(dataset)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-
-	if err := errg.Wait(); err != nil {
+	input, err := r.getInputValue(dataset)
+	if err != nil {
 		return false, err
 	}
 
